@@ -20,20 +20,20 @@ object Main extends App {
       verbose = p.verbose
 
       // Some validation
-      if (p.hubNamespace.isEmpty || p.hubName.isEmpty || p.hubKeyName.isEmpty || p.hubKey.isEmpty) {
+      if (p.hubNamespace.isEmpty || p.hubName.isEmpty || p.accessPolicy.isEmpty || p.accessKey.isEmpty) {
         println("Error: Some required parameters required to connect to Azure IoT Hub are missing:")
         if (p.hubNamespace.isEmpty) println("  Azure IoT Hub messaging namespace is missing")
         if (p.hubName.isEmpty) println("  Azure IoT Hub name is missing")
-        if (p.hubKeyName.isEmpty) println("  Azure IoT Hub policy name is missing")
-        if (p.hubKey.isEmpty) println("  Azure IoT Hub key is missing")
+        if (p.accessPolicy.isEmpty) println("  Azure IoT Hub policy name is missing")
+        if (p.accessKey.isEmpty) println("  Azure IoT Hub key is missing")
         Parameters().build.showUsage()
         sys.exit(-1)
       }
 
       // Download and print messages
       try {
-        log(s"Connecting to ${p.hubName} ${p.hubNamespace} ${p.hubKeyName}")
-        val connString = new ConnectionStringBuilder(p.hubNamespace, p.hubName, p.hubKeyName, p.hubKey).toString
+        log(s"Connecting to ${p.hubName} ${p.hubNamespace} ${p.accessPolicy}")
+        val connString = new ConnectionStringBuilder(p.hubNamespace, p.hubName, p.accessPolicy, p.accessKey).toString
         val client = EventHubClient.createFromConnectionStringSync(connString)
         log("Client ready")
 

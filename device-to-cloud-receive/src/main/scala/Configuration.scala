@@ -21,23 +21,26 @@ object Configuration {
   private[this] val conf: Config = ConfigFactory.load()
 
   // IoT hub storage details
-  val iotHubName     : String = try {
-    conf.getString(confPath + "name")
+  val hubName: String = try {
+    conf.getString(confPath + "hubName")
   } catch {
     case e: Exception => ""
   }
-  val iotHubNamespace: String = try {
-    conf.getString(confPath + "namespace")
+
+  val hubNamespace: String = try {
+    conf.getString(confPath + "hubNamespace")
   } catch {
     case e: Exception => ""
   }
-  val iotHubKeyName  : String = try {
-    conf.getString(confPath + "keyName")
+
+  val accessKey: String = try {
+    conf.getString(confPath + "accessKey")
   } catch {
     case e: Exception => ""
   }
-  val iotHubKey      : String = try {
-    conf.getString(confPath + "key")
+
+  val accessPolicy: String = try {
+    conf.getString(confPath + "accessPolicy")
   } catch {
     case e: Exception => ""
   }
@@ -45,10 +48,11 @@ object Configuration {
   // Consumer group used to retrieve messages
   // @see https://azure.microsoft.com/en-us/documentation/articles/event-hubs-overview
   private[this] val tmpCG = try {
-    conf.getString(confPath + "consumerGroup")
+    conf.getString(confPath + "receiverConsumerGroup")
   } catch {
     case e: Exception => ""
   }
+
   val receiverConsumerGroup: String =
     tmpCG.toUpperCase match {
       case "$DEFAULT" ⇒ EventHubClient.DEFAULT_CONSUMER_GROUP_NAME
@@ -62,6 +66,7 @@ object Configuration {
   } catch {
     case e: Exception => DefaultReceiverTimeout.toMillis
   }
+
   val receiverTimeout: FiniteDuration =
     if (tmpRTO > 0)
       FiniteDuration(tmpRTO, TimeUnit.MILLISECONDS)
@@ -74,6 +79,7 @@ object Configuration {
   } catch {
     case e: Exception => MaxBatchSize
   }
+
   val receiverBatchSize: Int =
     if (tmpRBS > 0 && tmpRBS <= MaxBatchSize)
       tmpRBS

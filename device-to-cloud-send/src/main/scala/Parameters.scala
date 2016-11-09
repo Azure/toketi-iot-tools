@@ -21,9 +21,10 @@ case class Parameters(
       arg[String]("<content>").unbounded().required().action((x, c) => c.copy(content = x)).text("Message content")
       opt[String]('h', "hub").required.valueName("<name>").action((x, c) => c.copy(hubName = x)).text("Azure IoT Hub name")
       opt[String]('d', "device").required.valueName("<ID>").action((x, c) => c.copy(deviceId = x)).text("Azure IoT device ID")
-      opt[String]('k', "key").required.valueName("<access key>").action((x, c) => c.copy(accessKey = x)).text("Azure IoT device authorization key")
+      opt[String]('k', "key").required.valueName("<key>").action((x, c) => c.copy(accessKey = x)).text("Azure IoT device authorization key")
       opt[String]('t', "type").valueName("<type>").action((x, c) => c.copy(contentType = x)).text("Message type, e.g. temperature, humidity etc.")
       opt[String]('f', "format").valueName("<format>").action((x, c) => c.copy(contentFormat = x)).text("Message format, e.g. json")
+
       opt[Unit]('v', "verbose").action((_, c) => c.copy(verbose = true)).text("Verbose flag")
 
       help("help").text("Prints this usage text")
