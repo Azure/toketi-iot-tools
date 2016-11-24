@@ -4,14 +4,17 @@
   */
 object Main extends App {
 
+  var verbose = false
+
   Parameters().build.parse(args, Parameters()) match {
     case Some(p) =>
+      verbose = p.verbose
       val device = new Device(p.hubName, p.deviceId, p.accessKey, p.verbose)
 
       device.sendMessage(p.content, p.contentFormat, p.contentType)
 
       while (!device.isReady) {
-        if (p.verbose) println("Waiting for confirmation...")
+        log("Waiting for confirmation...")
         Thread.sleep(1000)
       }
 
@@ -19,5 +22,9 @@ object Main extends App {
 
     case None =>
       sys.exit(-1)
+  }
+
+  def log(x: String): Unit = {
+    if (verbose) println(x)
   }
 }

@@ -13,14 +13,14 @@ class Device(hubName: String, deviceId: String, accessKey: String, verbose: Bool
   private val waitOnSend = 5000
   private val waitUnit   = 100
 
-  if (verbose) println("Connecting...")
+  log("Connecting...")
   private val client = new DeviceClient(connString, IotHubClientProtocol.HTTPS)
   client.open()
 
   private class EventCallback extends IotHubEventCallback {
     override def execute(status: IotHubStatusCode, context: scala.Any): Unit = {
       ready = true
-      if (verbose) println("Message sent.")
+      log("Message sent.")
     }
   }
 
@@ -41,11 +41,11 @@ class Device(hubName: String, deviceId: String, accessKey: String, verbose: Bool
       if (model.nonEmpty) message.setProperty(modelProp, model)
 
       // Send
-      if (verbose) println(s"Sending message '${content}' ...")
+      log(s"Sending message '${content}' ...")
       client.sendEventAsync(message, new EventCallback(), None)
 
       // Wait a bit
-      if (verbose) println("Waiting for confirmation...")
+      log("Waiting for confirmation...")
       var wait = waitOnSend
       if (!ready) while (wait > 0 && !ready) {
         Thread.sleep(waitUnit)
@@ -61,10 +61,14 @@ class Device(hubName: String, deviceId: String, accessKey: String, verbose: Bool
   }
 
   def disconnect(): Unit = {
-    if (verbose) println("Disconnecting...")
+    log("Disconnecting...")
     ready = false
     client.close()
-    if (verbose) println(s"Disconnected.")
+    log(s"Disconnected.")
+  }
+
+  def log(x: String): Unit = {
+    if (verbose) println(x)
   }
 }
 
