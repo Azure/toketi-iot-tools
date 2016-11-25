@@ -9,11 +9,14 @@ case class Parameters(
     accessPolicy: String = Configuration.accessPolicy,
     accessKey: String = Configuration.accessKey,
     deviceId: String = "",
-    msgId: String = "",
-    contentModel: String = "",
-    contentType: String = "",
-    content: String = "",
-    feedback: Boolean = false,
+    checkMsgId: String = "",
+    checkTimeout: Int = 60,
+    sendTimeout: Int = 10,
+    sendContentModel: String = "",
+    sendContentType: String = "",
+    sendContent: String = "",
+    sendFeedback: Boolean = false,
+    sendExpiration: Int = 86400,
     verbose: Boolean = false) {
 
   def build: OptionParser[Parameters] = {
@@ -32,14 +35,18 @@ case class Parameters(
       note("")
       cmd("send")
         .action((_, c) => c.copy(mode = "send"))
-        .children(opt[String]('m', "model").optional.valueName("<model>").action((x, c) => c.copy(contentModel = x)).text("Message model, e.g. temperature, humidity etc."),
-                   opt[String]('f', "format").optional.valueName("<format>").action((x, c) => c.copy(contentType = x)).text("Message format, e.g. json"),
-                   opt[Unit]('c', "check").optional.action((_, c) => c.copy(feedback = true)).text("Check status immediately after sending a message"),
-                   arg[String]("<content>").unbounded().required().action((x, c) => c.copy(content = x)).text("Message content"))
+        .children(opt[String]('m', "model").optional.valueName("<model>").action((x, c) => c.copy(sendContentModel = x)).text("Message model, e.g. temperature, humidity etc."),
+                   opt[String]('f', "format").optional.valueName("<format>").action((x, c) => c.copy(sendContentType = x)).text("Message format, e.g. json"),
+                   opt[Int]('e', "expire").optional.valueName("<seconds>").action((x, c) => c.copy(sendExpiration = x)).text("Message expiration in seconds"),
+                   opt[Int]("sendtimeout").required.valueName("<seconds>").action((x, c) => c.copy(sendTimeout = x)).text("Send timeout"),
+                   opt[Unit]('c', "check").optional.action((_, c) => c.copy(sendFeedback = true)).text("Check status immediately after sending a message"),
+                   arg[String]("<content>").unbounded().required().action((x, c) => c.copy(sendContent = x)).text("Message content"))
+
       note("")
       cmd("check")
         .action((_, c) => c.copy(mode = "check"))
-        .children(opt[String]('i', "id").required.valueName("<id>").action((x, c) => c.copy(msgId = x)).text("Message ID"))
+        .children(opt[String]('i', "id").required.valueName("<id>").action((x, c) => c.copy(checkMsgId = x)).text("Message ID"),
+                   opt[Int]("checktimeout").required.valueName("<seconds>").action((x, c) => c.copy(checkTimeout = x)).text("Check timeout"))
 
       note("")
       note("Auth details can be passed as a full connection string or by single parameters:")
@@ -52,9 +59,9 @@ case class Parameters(
       note("")
       note("Examples:")
       note("")
-      note("c2d-send send -d myDevice foo -h myhub.azure-devices.net -p service -k $IOT_SERVICE_KEY")
-      note("c2d-send send -v -d myDevice foo -h myhub.azure-devices.net -p service -k $IOT_SERVICE_KEY -c")
-      note("/c2d-send check -v -d myDevice -h myhub.azure-devices.net -p service -k $IOT_SERVICE_KEY -i f786dc8b-990a-46c6-9f2f-5dde9875269a")
+      note("c2d-send send -d myDevice mymessage -h myhub.azure-devices.net -p service -k $IOT_SERVICE_KEY --sendtimeout 10")
+      note("c2d-send send -v -d myDevice \"some text\" -h myhub.azure-devices.net -p service -k $IOT_SERVICE_KEY -c")
+      note("c2d-send check -v -d myDevice -h myhub.azure-devices.net -p service -k $IOT_SERVICE_KEY -i f786dc8b-990a-46c6-9f2f-5dde9875269a")
       note("")
 
       /*

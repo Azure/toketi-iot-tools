@@ -12,7 +12,6 @@ object Main extends App {
   var verbose       = false
   val correlationId = UUID.randomUUID().toString
   val userId        = "c2d-send"
-  val expiration    = 86400
 
   Parameters().build.parse(args, Parameters()) match {
     case Some(p) =>
@@ -24,16 +23,16 @@ object Main extends App {
 
         p.mode match {
           case "send"  => {
-            val msg = service.prepareMessage(p.deviceId, p.content, p.contentType, p.contentModel, expiration, userId, correlationId)
+            val msg = service.prepareMessage(p.deviceId, p.sendContent, p.sendContentType, p.sendContentModel, p.sendExpiration, userId, correlationId)
             println("Message ID: " + msg.id)
-            service.send(msg)
-            if (p.feedback) {
-              val feedback = service.getFeedback(msg.id)
+            service.send(msg, p.sendTimeout)
+            if (p.sendFeedback) {
+              val feedback = service.getFeedback(msg.id, p.checkTimeout)
               showFeedback(feedback)
             }
           }
           case "check" ⇒ {
-            val feedback = service.getFeedback(p.msgId)
+            val feedback = service.getFeedback(p.checkMsgId, p.checkTimeout)
             showFeedback(feedback)
           }
         }

@@ -11,8 +11,6 @@ import scala.language.{implicitConversions, postfixOps}
 class Service(deviceId: String, connString: String, verbose: Boolean) {
 
   val protocol         = IotHubServiceClientProtocol.AMQPS
-  val deliverTimeout   = 10000
-  val feedbackTimeout  = 60000
   val contentTypeProp  = "$$contentType"
   val contentModelProp = "$$contentModel"
 
@@ -46,19 +44,18 @@ class Service(deviceId: String, connString: String, verbose: Boolean) {
     msg
   }
 
-  def send(msg: MessageToDevice): Unit = {
+  def send(msg: MessageToDevice, timeout: Int): Unit = {
     log(s"Sending message...")
-    serviceClient
-      .sendAsync(msg.deviceId, msg.message)
+    serviceClient.sendAsync(msg.deviceId, msg.message)
       .exceptionally(e ⇒ {
         err("Request failed.")
         println(e)
         sys.exit(-1)
       })
-      .get(deliverTimeout, TimeUnit.MILLISECONDS)
+      .get(timeout, TimeUnit.SECONDS)
   }
 
-  def getFeedback(id: String): FeedbackRecord = {
+  def getFeedback(id: String, timeout: Int): FeedbackRecord = {
     log("Requesting feedback...")
     var found = false
     var attempts = 50
@@ -66,14 +63,13 @@ class Service(deviceId: String, connString: String, verbose: Boolean) {
     while (!found && attempts > 0) {
       attempts -= 1
 
-      val batch = feedbackReceiver
-        .receiveAsync()
+      val batch = feedbackReceiver.receiveAsync(timeout * 1000)
         .exceptionally(e ⇒ {
           err("Request failed.")
           println(e)
           sys.exit(-1)
         })
-        .get(feedbackTimeout, TimeUnit.MILLISECONDS)
+        .get(timeout + 3, TimeUnit.SECONDS)
       log(s"Feedback batch size: ${batch.getRecords.size()}")
 
       for (r ← batch.getRecords().asScala) {
