@@ -10,8 +10,8 @@ case class Parameters(
     accessKey: String = Configuration.accessKey,
     deviceId: String = "",
     checkMsgId: String = "",
-    checkTimeout: Int = 60,
-    sendTimeout: Int = 10,
+    checkTimeout: Int = 100,
+    sendTimeout: Int = 10000,
     sendContentModel: String = "",
     sendContentType: String = "",
     sendContent: String = "",
@@ -38,15 +38,16 @@ case class Parameters(
         .children(opt[String]('m', "model").optional.valueName("<model>").action((x, c) => c.copy(sendContentModel = x)).text("Message model, e.g. temperature, humidity etc."),
                    opt[String]('f', "format").optional.valueName("<format>").action((x, c) => c.copy(sendContentType = x)).text("Message format, e.g. json"),
                    opt[Int]('e', "expire").optional.valueName("<seconds>").action((x, c) => c.copy(sendExpiration = x)).text("Message expiration in seconds"),
-                   opt[Int]("sendtimeout").required.valueName("<seconds>").action((x, c) => c.copy(sendTimeout = x)).text("Send timeout"),
+                   opt[Int]("sendtimeout").optional.valueName("<msecs>").action((x, c) => c.copy(sendTimeout = x)).text("Send timeout"),
                    opt[Unit]('c', "check").optional.action((_, c) => c.copy(sendFeedback = true)).text("Check status immediately after sending a message"),
+                   opt[Int]("checktimeout").optional.valueName("<msecs>").action((x, c) => c.copy(checkTimeout = x)).text("Check timeout"),
                    arg[String]("<content>").unbounded().required().action((x, c) => c.copy(sendContent = x)).text("Message content"))
 
       note("")
       cmd("check")
         .action((_, c) => c.copy(mode = "check"))
         .children(opt[String]('i', "id").required.valueName("<id>").action((x, c) => c.copy(checkMsgId = x)).text("Message ID"),
-                   opt[Int]("checktimeout").required.valueName("<seconds>").action((x, c) => c.copy(checkTimeout = x)).text("Check timeout"))
+                   opt[Int]("checktimeout").optional.valueName("<msecs>").action((x, c) => c.copy(checkTimeout = x)).text("Check timeout"))
 
       note("")
       note("Auth details can be passed as a full connection string or by single parameters:")

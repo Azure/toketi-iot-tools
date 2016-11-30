@@ -24,8 +24,9 @@ object Main extends App {
         p.mode match {
           case "send"  => {
             val msg = service.prepareMessage(p.deviceId, p.sendContent, p.sendContentType, p.sendContentModel, p.sendExpiration, userId, correlationId)
-            println("Message ID: " + msg.id)
+            log("Message ID: " + msg.id)
             service.send(msg, p.sendTimeout)
+            log(s"Message '${msg.id}' for device '${p.deviceId}' added to the queue.", true)
             if (p.sendFeedback) {
               val feedback = service.getFeedback(msg.id, p.checkTimeout)
               showFeedback(feedback)
@@ -41,8 +42,8 @@ object Main extends App {
 
         case e: java.util.concurrent.CompletionException =>
           throw e
-          println(e)
-          err(e.toString)
+          log(e.toString, true)
+          err("Internal error")
           sys.exit(-1)
 
         case e: java.util.concurrent.TimeoutException =>
@@ -50,8 +51,8 @@ object Main extends App {
           sys.exit(-1)
 
         case e: Exception =>
+          log(e.toString, true)
           err("Ensure that either the application is configured or all parameters are passed.")
-          err(e.toString)
           sys.exit(-1)
       }
 
@@ -69,14 +70,16 @@ object Main extends App {
 
     else {
       // success, expired, deliveryCountExceeded, rejected, unknown
-      val status = feedback.getStatusCode().toString
-      log(s"Message to ${feedback.getDeviceId} enqueue status: ${feedback.getDescription} [${status}], " +
-        s"time ${feedback.getEnqueuedTimeUtc.toString}")
+      println(s"Message '${feedback.getOriginalMessageId}' status:\n" +
+        s"  Enqueue time: ${feedback.getEnqueuedTimeUtc.toString}\n" +
+        s"  Description: ${feedback.getDescription}\n" +
+        s"  Status code: ${feedback.getStatusCode}")
     }
   }
 
-  def log(x: String): Unit = {
+  def log(x: String, outputToUser: Boolean = false): Unit = {
     if (verbose) println(Instant.now + ": " + x)
+    if (outputToUser) println(x)
   }
 
   def err(x: String): Unit = {
