@@ -51,8 +51,11 @@ credentials are/are not required.
 # iot d2c send -t temperature 74
 ```
 
-Note: the value `temperature` passed to `-t` is user specific, i.e. Azure IoT Hub does not 
+The value `temperature` passed to `-t` is user specific, i.e. Azure IoT Hub does not 
 apply any logic to (not currently at least).
+
+The *type* is currently stored in a user property with name `$$contentModel`. Similarly 
+for the format, see next example.
 
 ## Send a JSON message from a Device to Azure IoT Hub
 
@@ -61,7 +64,7 @@ apply any logic to (not currently at least).
 ```
 
 Note: as for `-t` also the value `json` passed to `-f` is a user value, up to the your application
-to understand and process.
+to understand and process. The format value is stored in a user property with name `$$contentType`.
 
 ## Receive message sent by a Device to Azure IoT Hub
 
@@ -178,9 +181,14 @@ Done.
 The CLI tool is meant for **debugging/development purpose**. Some known issues that you might 
 encounter:
 
+* Message type cannot contain some special chars like `/`
+  (SDK issue [#1017](https://github.com/Azure/azure-iot-sdks/issues/1017)).
 * The status of enqueued C2D messages shows as "Successful" when not received yet
   (SDK issue [#993](https://github.com/Azure/azure-iot-sdks/issues/993)).
 * The status of rejected C2D messages shows as "unknown".
+  (SDK issue [#1015](https://github.com/Azure/azure-iot-sdks/issues/1015)).
+* The status of abandoned C2D messages shows as "unknown".
+  (SDK issue [#1016](https://github.com/Azure/azure-iot-sdks/issues/1016)).
 * Concurrent executions of device commands can crash
   (SDK issue [#995](https://github.com/Azure/azure-iot-sdks/issues/995))
 * Sometimes the internal client times out. The `c2d check` command in 
