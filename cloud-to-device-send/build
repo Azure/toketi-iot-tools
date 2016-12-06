@@ -1,3 +1,0 @@
-rm -f ./target/scala-2.12/*.jar
-sbt assembly
-mv ./target/scala-2.12/*.jar ./azure-c2d-send.jar
