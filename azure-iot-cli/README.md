@@ -45,15 +45,74 @@ credentials are/are not required.
 
 # Examples
 
-## Send message from a Device to Azure IoT Hub
+## Send a typed message from a Device to Azure IoT Hub
 
 ```
-# ./iot d2c send -t temperature 74
-Done.
+# iot d2c send -t temperature 74
 ```
 
+Note: the value `temperature` passed to `-t` is user specific, i.e. Azure IoT Hub does not 
+apply any logic to (not currently at least).
+
+## Send a JSON message from a Device to Azure IoT Hub
+
 ```
-# ./iot d2c send -v -t temperature 74
+# iot d2c send -t temperature -f json '{"value":74}'
+```
+
+Note: as for `-t` also the value `json` passed to `-f` is a user value, up to the your application
+to understand and process.
+
+## Receive message sent by a Device to Azure IoT Hub
+
+This command requires to know which partition holds the messages for a specific device. To receive
+all the messages regardless, a future command 'd2c stream' based on 
+[IoTHub React](https://github.com/Azure/toketi-iothubreact) is coming soon.
+
+```
+# iot d2c receive -s 3
+1812509505056 - 2016-12-06T02:00:14.056Z - temperature - 74
+... message 2 ...
+... message 3 ...
+...
+```
+
+## Send a text message to a Device
+
+```
+# iot c2d send reboot
+Message '8ab83665-d2af-4d5d-bd18-64795f75d106' for device 'device1001' added to the queue.
+```
+
+## Start receiving and Reject messages sent to a Device
+
+```
+# iot c2d receive --action REJECT
+Press enter to exit...
+Received message:
+  ID: 8ab83665-d2af-4d5d-bd18-64795f75d106
+  Content: reboot
+Replying to the message with `REJECT`
+```
+
+## Check the status of a message sent to a Device
+
+```
+# iot c2d check -i f4a7f441-e9ce-4213-9a8b-1dac1dd73870
+Message 'f4a7f441-e9ce-4213-9a8b-1dac1dd73870' status:
+  Enqueue time: 2016-12-06T02:07:06.110023600Z
+  Description: Message rejected
+  Status code: unknown
+```
+
+## Debugging
+
+Add `-v` to any command to enable verbose logging and see how the tool interacts with Azure IoT Hub.
+
+Example 1:
+
+```
+# iot d2c send -v -t temperature 74
 2016-12-06T01:54:48.020Z: Correlation ID: e2e42789-11a0-4fb9-9435-c93ebcf1af25
 2016-12-06T01:54:48.096Z: Retrieving Hub namespace from environment var `IOTCLI_HUB_NAMESPACE`
 2016-12-06T01:54:48.098Z: Retrieving Hub name from environment var `IOTCLI_HUB_NAME`
@@ -72,22 +131,10 @@ Done.
 Done.
 ```
 
-## Receive message sent by a Device to Azure IoT Hub
-
-This command requires to know which partition holds the messages for a specific device. To receive
-all the messages regardless, a future command 'd2c stream' based on 
-[IoTHub React](https://github.com/Azure/toketi-iothubreact) is coming soon.
+Example 2:
 
 ```
-# ./iot d2c receive -s 3
-1812509505056 - 2016-12-06T02:00:14.056Z - temperature - 74
-... message 2 ...
-... message 3 ...
-...
-```
-
-```
-# ./iot d2c receive -s 3 -v
+# iot d2c receive -s 3 -v
 2016-12-06T01:55:18.383Z: Correlation ID: 05f06ec0-b9d3-4e0d-8588-8206df5b20ec
 2016-12-06T01:55:18.457Z: Retrieving Hub namespace from environment var `IOTCLI_HUB_NAMESPACE`
 2016-12-06T01:55:18.459Z: Retrieving Hub name from environment var `IOTCLI_HUB_NAME`
@@ -104,16 +151,10 @@ all the messages regardless, a future command 'd2c stream' based on
 ...
 ```
 
-## Send message to a Device
+Example 3:
 
 ```
-# ./iot c2d send reboot
-Message '8ab83665-d2af-4d5d-bd18-64795f75d106' for device 'device1001' added to the queue.
-Done.
-```
-
-```
-# ./iot c2d send -v reboot
+# iot c2d send -v reboot
 2016-12-06T01:59:54.493Z: Correlation ID: 7aaf6dae-86fc-498c-95dc-29b73b8a7f87
 2016-12-06T01:59:54.571Z: Retrieving Hub namespace from environment var `IOTCLI_HUB_NAMESPACE`
 2016-12-06T01:59:54.572Z: Retrieving Hub name from environment var `IOTCLI_HUB_NAME`
@@ -129,28 +170,6 @@ Done.
 2016-12-06T01:59:56.372Z: Message ID: 67b95019-4788-4a34-b2a9-637e9190dd0e
 2016-12-06T01:59:56.372Z: Message '67b95019-4788-4a34-b2a9-637e9190dd0e' for device 'device1001' added to the queue.
 Message '67b95019-4788-4a34-b2a9-637e9190dd0e' for device 'device1001' added to the queue.
-Done.
-```
-
-## Start receiving and Reject messages sent to a Device
-
-```
-# ./iot c2d receive --action REJECT
-Press enter to exit...
-Received message:
-  ID: 8ab83665-d2af-4d5d-bd18-64795f75d106
-  Content: reboot
-Replying to the message with `REJECT`
-```
-
-## Check the status of a message sent to a Device
-
-```
-./iot c2d check -i f4a7f441-e9ce-4213-9a8b-1dac1dd73870
-Message 'f4a7f441-e9ce-4213-9a8b-1dac1dd73870' status:
-  Enqueue time: 2016-12-06T02:07:06.110023600Z
-  Description: Message rejected
-  Status code: unknown
 Done.
 ```
 
