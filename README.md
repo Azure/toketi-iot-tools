@@ -1,10 +1,6 @@
-# Azure IoT Developer Command Line Interface
+# Index
 
-A **cross-platform** command line tool, to help **developing, testing and debugging** messaging 
-from & to **Internet connected devices** and 
-[**Azure IoT Hub**](https://azure.microsoft.com/en-us/services/iot-hub/).
-
-[Read more...](azure-iot-cli/README.md)
+1. `Codestyle.IntelliJ.xml`: code style used across Scala and Java projects
 
 # Contribute Code
 
